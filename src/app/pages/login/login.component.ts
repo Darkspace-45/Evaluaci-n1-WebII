@@ -32,6 +32,7 @@ export class LoginComponent implements OnInit {
     rememberMe: false
   };
 
+  // Datos del JSON para la autenticación
   usersData: any = null;
 
   constructor(
@@ -40,6 +41,7 @@ export class LoginComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Comprobar si ya hay un usuario logueado en localStorage
     if (localStorage.getItem('login') === 'true') {
       const userRole = localStorage.getItem('userRole');
       if (userRole) {
@@ -49,9 +51,11 @@ export class LoginComponent implements OnInit {
       }
     }
 
+    // Cargar datos de usuarios desde la API
     this.loadUsers();
   }
 
+  // Cargar usuarios disponibles desde la API
   loadUsers(): void {
     this.servicio.getLogin().subscribe({
       next: (data) => {
@@ -66,55 +70,66 @@ export class LoginComponent implements OnInit {
 
   setActiveTab(tab: 'estudiante' | 'docente'): void {
     this.activeTab = tab;
-    this.loginError = '';
-    
-    if (this.loginForm) {
-      this.loginForm.resetForm(this.loginData);
-    }
+    this.loginError = ''; // Limpiar errores al cambiar de tab
   }
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
+  // Método de login que solicitaste
   login(formulario: any) {
-    if (formulario.invalid) {
-      Object.keys(formulario.controls).forEach(key => {
-        formulario.controls[key].markAsTouched();
-      });
+    // Validación básica del formulario
+    if (formulario && formulario.invalid) {
+      if (formulario.controls) {
+        Object.keys(formulario.controls).forEach(key => {
+          formulario.controls[key].markAsTouched();
+        });
+      }
       return;
     }
 
     this.isLoading = true;
+    const loginValue = formulario && formulario.value ? formulario.value : this.loginData;
 
+    // Verificar primero si el usuario existe en nuestros datos JSON
     if (this.usersData) {
+      // Determinar qué colección usar según la pestaña activa
       const collection = this.activeTab === 'estudiante' ? this.usersData.estudiantes : this.usersData.docentes;
       
+      // Buscar usuario con credenciales coincidentes
       const user = collection.find((u: any) => 
-        u.email === formulario.value.email && 
-        u.password === formulario.value.password
+        u.email === loginValue.email && 
+        u.password === loginValue.password
       );
       
       if (user) {
+        // Si encontramos al usuario en los datos JSON, guardamos su rol
         localStorage.setItem('userRole', this.activeTab);
       }
     }
 
-    this.servicio.postLogin(formulario.value).subscribe({
+    // Llamar al servicio de login como solicitaste
+    this.servicio.postLogin(loginValue).subscribe({
       next: (acceso) => {
         this.isLoading = false;
         console.log(acceso);
         
-        let token = acceso.accessToken;
-        if (token != '') {
-          localStorage.setItem('login', 'true');
-          
-          const userRole = localStorage.getItem('userRole');
-          if (userRole) {
-            this.redirectBasedOnRole(userRole);
-          } else {
-            this.route.navigate(['privado']);
+        if (acceso && acceso.accessToken) {
+          let token = acceso.accessToken;
+          if (token !== '') {
+            localStorage.setItem('login', 'true');
+            
+            // Verificar el tipo de usuario para la redirección
+            const userRole = localStorage.getItem('userRole');
+            if (userRole) {
+              this.redirectBasedOnRole(userRole);
+            } else {
+              this.route.navigate(['privado']);
+            }
           }
+        } else {
+          this.loginError = 'Error de autenticación. Credenciales inválidas.';
         }
       },
       error: (err) => {
@@ -125,6 +140,20 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  // Autollenar credenciales para demo
+  fillDemoCredentials(): void {
+    if (!this.usersData) return;
+    
+    const collection = this.activeTab === 'estudiante' ? this.usersData.estudiantes : this.usersData.docentes;
+    
+    if (collection && collection.length > 0) {
+      const user = collection[0];
+      this.loginData.email = user.email;
+      this.loginData.password = user.password;
+    }
+  }
+
+  // Redirigir según el rol
   private redirectBasedOnRole(role: string): void {
     if (role === 'estudiante') {
       this.route.navigate(['/estudiantes']);
