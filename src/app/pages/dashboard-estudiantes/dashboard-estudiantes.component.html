@@ -1,0 +1,137 @@
+<!-- dashboard-estudiantes.component.html -->
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1>Bienvenido, {{ studentName }}</h1>
+            <p>Panel de control para estudiantes</p>
+        </div>
+        <div class="header-actions">
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="student-profile">
+                <div class="avatar">{{ getInitials(studentName) }}</div>
+                <span>{{ studentName }}</span>
+            </div>
+            <div>
+                <button class="logout-button" (click)="logout()">Cerrar Sesión</button>
+            </div>
+        </div>  
+    </div>
+
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-content">
+                <p>Materias Inscritas</p>
+                <h3>{{ courses.length }}</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-content">
+                <p>Promedio General</p>
+                <h3>{{ getAverageGrade() | number:'1.1-1' }}</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-content">
+                <p>Tareas Pendientes</p>
+                <h3>{{ pendingAssignments }}</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-content">
+                <p>Próximos Exámenes</p>
+                <h3>{{ upcomingExams }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">
+        <h2>Mis Materias</h2>
+        <div class="view-options">
+            <button [ngClass]="{'active': viewMode === 'grid'}" (click)="viewMode = 'grid'">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button [ngClass]="{'active': viewMode === 'list'}" (click)="viewMode = 'list'">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="courses-container" [ngClass]="viewMode">
+        <div class="course-card" *ngFor="let course of courses">
+            <div class="course-image">
+                <img [src]="course.imageUrl" [alt]="course.name">
+                <div class="course-overlay">
+                    <span class="course-progress">{{ course.progress }}% Completado</span>
+                </div>
+            </div>
+            <div class="course-content">
+                <h3>{{ course.name }}</h3>
+                <p class="course-teacher">{{ course.teacher }}</p>
+                <div class="course-details">
+                    <div class="detail-item">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ course.schedule }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-star"></i>
+                        <span>Calificación: {{ course.grade }}/100</span>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" [style.width.%]="course.progress"
+                        [ngClass]="getProgressClass(course.progress)"></div>
+                </div>
+                <div class="course-actions">
+                    <button class="action-button primary">
+                        <i class="fas fa-book-open"></i> Ver Curso
+                    </button>
+                    <button class="action-button secondary">
+                        <i class="fas fa-tasks"></i> Tareas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="upcoming-section">
+        <h2>Próximas Actividades</h2>
+        <div class="activities-container">
+            <div class="activity-card" *ngFor="let activity of upcomingActivities">
+                <div class="activity-date">
+                    <span class="day">{{ activity.date.day }}</span>
+                    <span class="month">{{ activity.date.month }}</span>
+                </div>
+                <div class="activity-content">
+                    <h4>{{ activity.title }}</h4>
+                    <p>{{ activity.description }}</p>
+                    <div class="activity-meta">
+                        <span class="activity-course">
+                            <i class="fas fa-book"></i> {{ activity.course }}
+                        </span>
+                        <span class="activity-time">
+                            <i class="fas fa-clock"></i> {{ activity.time }}
+                        </span>
+                    </div>
+                </div>
+                <div class="activity-type" [ngClass]="activity.type">
+                    <i class="fas" [ngClass]="getActivityIcon(activity.type)"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,16 @@
+    {
+        "estudiantes": [
+            {
+                "email": "maria@gmail.com",
+                "password": "123456",
+                "id": 1
+            }
+        ],
+        "docentes": [
+            {
+                "email": "jorge@gmail.com",
+                "password": "123",
+                "id": 1
+            }
+        ]
+    }

@@ -1,0 +1,37 @@
+<nav class="navbar" [ngClass]="{'scrolled': scrolled}">
+    <div class="navbar-container">
+        <a href="#" class="navbar-logo">
+            <i class="fas fa-graduation-cap logo-icon"></i>
+            <span>InnovaLearn</span>
+        </a>
+
+        <div class="menu-icon" (click)="toggleMenu()">
+            <i class="fas" [ngClass]="{'fa-bars': !menuOpen, 'fa-times': menuOpen}"></i>
+        </div>
+
+        <ul class="nav-menu" [ngClass]="{'active': menuOpen}">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="inicio" routerLinkActive="active" (click)="closeMenu()">
+                    <i class="fas fa-home nav-icon"></i> Inicio
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="docentes" routerLinkActive="active" (click)="closeMenu()">
+                    <i class="fas fa-chalkboard-teacher nav-icon"></i> Docentes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="estudiantes" routerLinkActive="active" (click)="closeMenu()">
+                    <i class="fas fa-user-graduate nav-icon"></i> Estudiantes
+                </a>
+            </li>
+            @if (!authenticacion()) {
+            <div class="auth-buttons">
+                <button class="login-btn" routerLink="login" (click)="closeMenu()">
+                    <i class="fas fa-user-circle"></i> Iniciar sesión
+                </button>
+            </div>
+            }
+        </ul>
+    </div>
+</nav>
