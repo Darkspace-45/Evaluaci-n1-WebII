@@ -32,7 +32,6 @@ export class LoginComponent implements OnInit {
     rememberMe: false
   };
 
-  // Datos del JSON para la autenticación
   usersData: any = null;
 
   constructor(
@@ -41,7 +40,6 @@ export class LoginComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Comprobar si ya hay un usuario logueado en localStorage
     if (localStorage.getItem('login') === 'true') {
       const userRole = localStorage.getItem('userRole');
       if (userRole) {
@@ -51,11 +49,9 @@ export class LoginComponent implements OnInit {
       }
     }
 
-    // Cargar datos de usuarios desde la API
     this.loadUsers();
   }
 
-  // Cargar usuarios disponibles desde la API
   loadUsers(): void {
     this.servicio.getLogin().subscribe({
       next: (data) => {
@@ -70,9 +66,8 @@ export class LoginComponent implements OnInit {
 
   setActiveTab(tab: 'estudiante' | 'docente'): void {
     this.activeTab = tab;
-    this.loginError = ''; // Limpiar errores al cambiar de tab
+    this.loginError = '';
     
-    // Resetear la validación del formulario cuando cambie el tab
     if (this.loginForm) {
       this.loginForm.resetForm(this.loginData);
     }
@@ -82,9 +77,7 @@ export class LoginComponent implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
-  // Método de login que solicitaste
   login(formulario: any) {
-    // Validación básica del formulario
     if (formulario.invalid) {
       Object.keys(formulario.controls).forEach(key => {
         formulario.controls[key].markAsTouched();
@@ -94,24 +87,19 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Verificar primero si el usuario existe en nuestros datos JSON
     if (this.usersData) {
-      // Determinar qué colección usar según la pestaña activa
       const collection = this.activeTab === 'estudiante' ? this.usersData.estudiantes : this.usersData.docentes;
       
-      // Buscar usuario con credenciales coincidentes
       const user = collection.find((u: any) => 
         u.email === formulario.value.email && 
         u.password === formulario.value.password
       );
       
       if (user) {
-        // Si encontramos al usuario en los datos JSON, guardamos su rol
         localStorage.setItem('userRole', this.activeTab);
       }
     }
 
-    // Llamar al servicio de login como solicitaste
     this.servicio.postLogin(formulario.value).subscribe({
       next: (acceso) => {
         this.isLoading = false;
@@ -121,7 +109,6 @@ export class LoginComponent implements OnInit {
         if (token != '') {
           localStorage.setItem('login', 'true');
           
-          // Verificar el tipo de usuario para la redirección
           const userRole = localStorage.getItem('userRole');
           if (userRole) {
             this.redirectBasedOnRole(userRole);
@@ -138,26 +125,6 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  // Autollenar credenciales para demo
-  fillDemoCredentials(): void {
-    if (!this.usersData) return;
-    
-    const collection = this.activeTab === 'estudiante' ? this.usersData.estudiantes : this.usersData.docentes;
-    
-    if (collection && collection.length > 0) {
-      const user = collection[0];
-      this.loginData.email = user.email;
-      this.loginData.password = user.password;
-      
-      // Resetear validaciones después de rellenar
-      if (this.loginForm) {
-        this.loginForm.form.markAsPristine();
-        this.loginForm.form.markAsUntouched();
-      }
-    }
-  }
-
-  // Redirigir según el rol
   private redirectBasedOnRole(role: string): void {
     if (role === 'estudiante') {
       this.route.navigate(['/estudiantes']);
