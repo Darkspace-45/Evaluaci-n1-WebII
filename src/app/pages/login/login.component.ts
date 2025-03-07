@@ -47,7 +47,8 @@ export class LoginComponent implements OnInit {
       if (userRole) {
         this.redirectBasedOnRole(userRole);
       } else {
-        this.route.navigate(['privado']);
+        // Si no hay rol especificado, redirigir a dashboard-docentes por defecto
+        this.route.navigate(['dashboard-docentes']);
       }
     }
 
@@ -77,7 +78,7 @@ export class LoginComponent implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
-  // Método de login que solicitaste
+  // Método de login
   login(formulario: any) {
     // Validación básica del formulario
     if (formulario && formulario.invalid) {
@@ -109,7 +110,7 @@ export class LoginComponent implements OnInit {
       }
     }
 
-    // Llamar al servicio de login como solicitaste
+    // Llamar al servicio de login
     this.servicio.postLogin(loginValue).subscribe({
       next: (acceso) => {
         this.isLoading = false;
@@ -125,7 +126,10 @@ export class LoginComponent implements OnInit {
             if (userRole) {
               this.redirectBasedOnRole(userRole);
             } else {
-              this.route.navigate(['privado']);
+              // Si no se determinó el rol pero el login fue exitoso,
+              // usar el rol de la pestaña activa para la redirección
+              localStorage.setItem('userRole', this.activeTab);
+              this.redirectBasedOnRole(this.activeTab);
             }
           }
         } else {
@@ -140,27 +144,12 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  // Autollenar credenciales para demo
-  fillDemoCredentials(): void {
-    if (!this.usersData) return;
-    
-    const collection = this.activeTab === 'estudiante' ? this.usersData.estudiantes : this.usersData.docentes;
-    
-    if (collection && collection.length > 0) {
-      const user = collection[0];
-      this.loginData.email = user.email;
-      this.loginData.password = user.password;
-    }
-  }
-
   // Redirigir según el rol
   private redirectBasedOnRole(role: string): void {
     if (role === 'estudiante') {
-      this.route.navigate(['/estudiantes']);
+      this.route.navigate(['/dashboard-estudiantes']);
     } else if (role === 'docente') {
-      this.route.navigate(['/docentes']);
-    } else {
-      this.route.navigate(['privado']);
+      this.route.navigate(['/dashboard-docentes']);
     }
   }
 }

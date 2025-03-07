@@ -9,7 +9,7 @@ export class LoginService {
 
   constructor(private http: HttpClient) { }
 
-  private API_INGRESO = 'http://localhost:3000/ingreso';
+  private API_INGRESO = 'http://localhost:3000/users';
 
   getLogin(): Observable<any> {
     return this.http.get(this.API_INGRESO); {
